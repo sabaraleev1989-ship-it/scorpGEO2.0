@@ -1,0 +1,41 @@
+import { create } from 'zustand';
+
+export interface MapObject {
+  id: string;
+  type: 'enemy' | 'arrow' | 'target' | 'flag';
+  data: any;
+}
+
+interface AppState {
+  selectedTool: string | null;
+  setTool: (tool: string | null) => void;
+  mapObjects: MapObject[];
+  addMapObject: (obj: MapObject) => void;
+  removeMapObject: (id: string) => void;
+  clearMapObjects: () => void;
+  fighters: Map<string, { id: string; team: string; lat: number; lng: number }>;
+  updateFighter: (fighter: { id: string; team: string; lat: number; lng: number }) => void;
+  removeFighter: (id: string) => void;
+}
+
+export const useStore = create<AppState>((set) => ({
+  selectedTool: null,
+  setTool: (tool) => set({ selectedTool: tool }),
+  mapObjects: [],
+  addMapObject: (obj) => set((state) => ({ mapObjects: [...state.mapObjects, obj] })),
+  removeMapObject: (id) => set((state) => ({ mapObjects: state.mapObjects.filter(o => o.id !== id) })),
+  clearMapObjects: () => set({ mapObjects: [] }),
+  fighters: new Map(),
+  updateFighter: (fighter) =>
+    set((state) => {
+      const newFighters = new Map(state.fighters);
+      newFighters.set(fighter.id, fighter);
+      return { fighters: newFighters };
+    }),
+  removeFighter: (id) =>
+    set((state) => {
+      const newFighters = new Map(state.fighters);
+      newFighters.delete(id);
+      return { fighters: newFighters };
+    }),
+}));
